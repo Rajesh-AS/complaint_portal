@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Manage Complaint #{{ complaint.id }} — Admin — Complaint Portal{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Manage Complaint #{{ complaint.id }}</h1>
+    <p><a href="{{ url_for('admin_complaints') }}">&larr; Back to All Complaints</a></p>
+</div>
+
+<!-- Complaint Details -->
+<div class="detail-card">
+    <h2>{{ complaint.title }}</h2>
+
+    <div class="detail-grid">
+        <div class="detail-item">
+            <label>Complaint ID</label>
+            <p>#{{ complaint.id }}</p>
+        </div>
+        <div class="detail-item">
+            <label>Submitted By</label>
+            <p>{{ complaint.user.full_name }}<br><small style="color:var(--text-muted);">{{ complaint.user.email }}</small></p>
+        </div>
+        <div class="detail-item">
+            <label>Category</label>
+            <p>{{ complaint.category }}</p>
+        </div>
+        <div class="detail-item">
+            <label>Priority</label>
+            <p><span class="badge badge-{{ complaint.priority|lower }}">{{ complaint.priority }}</span></p>
+        </div>
+        <div class="detail-item">
+            <label>Current Status</label>
+            <p><span class="badge badge-{{ complaint.status|lower|replace(' ', '-') }}">{{ complaint.status }}</span></p>
+        </div>
+        <div class="detail-item">
+            <label>Created</label>
+            <p>{{ complaint.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+        </div>
+        <div class="detail-item">
+            <label>Last Updated</label>
+            <p>{{ complaint.updated_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+        </div>
+    </div>
+
+    <div class="detail-description">
+        <h3>Description</h3>
+        <p>{{ complaint.description }}</p>
+    </div>
+
+    {% if complaint.admin_response %}
+    <div class="response-card">
+        <h3>📩 Current Admin Response</h3>
+        <p>{{ complaint.admin_response }}</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Update Form -->
+<div class="update-form">
+    <h2>Update Complaint</h2>
+
+    <form method="POST" action="{{ url_for('admin_update_complaint', id=complaint.id) }}">
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" name="status" class="form-control" required>
+                {% for s in statuses %}
+                    <option value="{{ s }}" {% if complaint.status == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="admin_response">Admin Response</label>
+            <textarea id="admin_response" name="admin_response" class="form-control"
+                      placeholder="Type your response to the user...">{{ complaint.admin_response or '' }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-success">✅ Update Complaint</button>
+    </form>
+</div>
+{% endblock %}

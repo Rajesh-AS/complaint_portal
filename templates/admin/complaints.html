@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}All Complaints — Admin — Complaint Portal{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>All Complaints</h1>
+    <p>Manage and respond to user complaints</p>
+</div>
+
+<!-- Filters -->
+<form class="filters" method="GET" action="{{ url_for('admin_complaints') }}">
+    <div class="filter-group">
+        <label>Search</label>
+        <input type="text" name="search" class="form-control" placeholder="Search by title or description..."
+               value="{{ current_search }}">
+    </div>
+    <div class="filter-group">
+        <label>Status</label>
+        <select name="status" class="form-control" onchange="this.form.submit()">
+            <option value="">All Statuses</option>
+            {% for s in statuses %}
+                <option value="{{ s }}" {% if current_status == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Category</label>
+        <select name="category" class="form-control" onchange="this.form.submit()">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+                <option value="{{ cat }}" {% if current_category == cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Priority</label>
+        <select name="priority" class="form-control" onchange="this.form.submit()">
+            <option value="">All Priorities</option>
+            {% for p in priorities %}
+                <option value="{{ p }}" {% if current_priority == p %}selected{% endif %}>{{ p }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="filter-group" style="flex:0;">
+        <label>&nbsp;</label>
+        <button type="submit" class="btn btn-primary btn-sm">Search</button>
+    </div>
+</form>
+
+<!-- Complaints Table -->
+<div class="table-container">
+    <div class="table-header">
+        <h2>Complaints ({{ complaints|length }})</h2>
+    </div>
+
+    {% if complaints %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in complaints %}
+            <tr>
+                <td>#{{ c.id }}</td>
+                <td>{{ c.user.full_name }}<br><small style="color:var(--text-muted);">{{ c.user.email }}</small></td>
+                <td>{{ c.title }}</td>
+                <td>{{ c.category }}</td>
+                <td><span class="badge badge-{{ c.priority|lower }}">{{ c.priority }}</span></td>
+                <td><span class="badge badge-{{ c.status|lower|replace(' ', '-') }}">{{ c.status }}</span></td>
+                <td>{{ c.created_at.strftime('%d %b %Y') }}</td>
+                <td><a href="{{ url_for('admin_complaint_detail', id=c.id) }}" class="btn btn-sm btn-secondary">Manage</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <div class="icon">📭</div>
+        <p>No complaints found matching your filters.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

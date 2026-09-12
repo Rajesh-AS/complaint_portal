@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Complaint #{{ complaint.id }} — Complaint Portal{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Complaint #{{ complaint.id }}</h1>
+    <p><a href="{{ url_for('complaints') }}">&larr; Back to My Complaints</a></p>
+</div>
+
+<!-- Complaint Details -->
+<div class="detail-card">
+    <h2>{{ complaint.title }}</h2>
+
+    <div class="detail-grid">
+        <div class="detail-item">
+            <label>Complaint ID</label>
+            <p>#{{ complaint.id }}</p>
+        </div>
+        <div class="detail-item">
+            <label>Category</label>
+            <p>{{ complaint.category }}</p>
+        </div>
+        <div class="detail-item">
+            <label>Priority</label>
+            <p><span class="badge badge-{{ complaint.priority|lower }}">{{ complaint.priority }}</span></p>
+        </div>
+        <div class="detail-item">
+            <label>Status</label>
+            <p><span class="badge badge-{{ complaint.status|lower|replace(' ', '-') }}">{{ complaint.status }}</span></p>
+        </div>
+        <div class="detail-item">
+            <label>Created</label>
+            <p>{{ complaint.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+        </div>
+        <div class="detail-item">
+            <label>Last Updated</label>
+            <p>{{ complaint.updated_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+        </div>
+    </div>
+
+    <div class="detail-description">
+        <h3>Description</h3>
+        <p>{{ complaint.description }}</p>
+    </div>
+
+    <!-- Admin Response -->
+    {% if complaint.admin_response %}
+    <div class="response-card">
+        <h3>📩 Admin Response</h3>
+        <p>{{ complaint.admin_response }}</p>
+    </div>
+    {% else %}
+    <div class="response-card" style="opacity: 0.6;">
+        <h3>📩 Admin Response</h3>
+        <p class="no-response">No response yet. The admin team will respond shortly.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

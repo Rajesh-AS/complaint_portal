@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Complaint Portal — Home{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Online Complaint Management System</h1>
+    <p>Submit, track, and resolve your complaints efficiently. Our portal ensures your voice is heard and acted upon promptly.</p>
+    <div class="hero-actions">
+        {% if current_user %}
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+        {% else %}
+            <a href="{{ url_for('register') }}" class="btn btn-primary">Get Started</a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline">Login</a>
+        {% endif %}
+    </div>
+</section>
+
+<section class="features">
+    <div class="feature-card">
+        <div class="icon">📝</div>
+        <h3>Submit Complaints</h3>
+        <p>Easily file your complaints with detailed descriptions, categories, and priority levels.</p>
+    </div>
+    <div class="feature-card">
+        <div class="icon">📊</div>
+        <h3>Track Status</h3>
+        <p>Monitor the progress of your complaints in real-time from your personal dashboard.</p>
+    </div>
+    <div class="feature-card">
+        <div class="icon">💬</div>
+        <h3>Get Responses</h3>
+        <p>Receive official responses from the admin team directly on your complaint detail page.</p>
+    </div>
+    <div class="feature-card">
+        <div class="icon">🔒</div>
+        <h3>Secure & Private</h3>
+        <p>Your data is protected with secure authentication and role-based access control.</p>
+    </div>
+</section>
+{% endblock %}
