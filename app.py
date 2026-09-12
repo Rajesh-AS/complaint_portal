@@ -15,7 +15,17 @@ from models import db, User, Complaint
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///complaint.db'
+
+# Database: use DATABASE_URL for production (PostgreSQL), fallback to SQLite for local dev
+database_url = os.environ.get('DATABASE_URL')
+if database_url:
+    # Handle Heroku/Supabase-style postgres:// URIs
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///complaint.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
@@ -27,19 +37,37 @@ db.init_app(app)
 
 def create_admin():
     """Create the default admin account if it doesn't already exist."""
-    admin = User.query.filter_by(email='admin@example.com').first()
+    admin_email = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
+    admin_password = os.environ.get('ADMIN_PASSWORD', 'Admin@123')
+    admin = User.query.filter_by(email=admin_email).first()
     if admin is None:
         admin = User(
             full_name='Admin',
-            email='admin@example.com',
+            email=admin_email,
             is_admin=True
         )
-        admin.set_password('Admin@123')
+        admin.set_password(admin_password)
         db.session.add(admin)
         db.session.commit()
-        print(' * Admin account created: admin@example.com / Admin@123')
+        print(f' * Admin account created: {admin_email}')
     else:
         print(' * Admin account already exists.')
+
+
+# ---------------------------------------------------------------------------
+# Database initialization — runs once on first request (safe for Vercel)
+# ---------------------------------------------------------------------------
+
+_db_initialized = False
+
+@app.before_request
+def initialize_database():
+    """Create tables and seed admin on the very first request."""
+    global _db_initialized
+    if not _db_initialized:
+        db.create_all()
+        create_admin()
+        _db_initialized = True
 
 
 # ---------------------------------------------------------------------------
@@ -372,3 +400,4 @@ if __name__ == '__main__':
         db.create_all()
         create_admin()
     app.run(debug=True)
+
