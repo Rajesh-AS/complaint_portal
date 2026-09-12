@@ -1,4 +1,5 @@
 import os
+import logging
 from functools import wraps
 from datetime import datetime
 
@@ -15,6 +16,10 @@ from models import db, User, Complaint
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+
+# Configure logging for Vercel Runtime Logs
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Database: use DATABASE_URL for production (PostgreSQL), fallback to SQLite for local dev
 database_url = os.environ.get('DATABASE_URL')
@@ -65,9 +70,20 @@ def initialize_database():
     """Create tables and seed admin on the very first request."""
     global _db_initialized
     if not _db_initialized:
-        db.create_all()
-        create_admin()
-        _db_initialized = True
+        try:
+            db.create_all()
+            create_admin()
+            _db_initialized = True
+            logger.info('Database initialized successfully.')
+        except Exception as e:
+            logger.error(f'Database initialization failed: {e}')
+            if not os.environ.get('DATABASE_URL'):
+                logger.error(
+                    'DATABASE_URL is not set. '
+                    'On Vercel, you must set DATABASE_URL to a PostgreSQL connection string. '
+                    'SQLite cannot work on Vercel serverless (read-only filesystem).'
+                )
+            raise
 
 
 # ---------------------------------------------------------------------------
